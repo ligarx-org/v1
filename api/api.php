@@ -354,11 +354,11 @@ try {
             
         case 'contact':
             if ($method === 'POST') {
-                logSuccess("Contact request received");
+                error_log("Contact request received");
                 $data = json_decode(file_get_contents('php://input'), true);
                 
                 if (!$data) {
-                    logError("Invalid JSON data for contact");
+                    error_log("Invalid JSON data for contact");
                     jsonResponse(['success' => false, 'message' => 'Noto\'g\'ri ma\'lumot formati']);
                 }
                 
@@ -367,18 +367,18 @@ try {
                 $message = sanitizeInput($data['message']);
                 $captcha = $data['captcha'];
                 
-                logSuccess("Contact form data", ['name' => $name, 'email' => $email]);
+                error_log("Contact form data: " . json_encode(['name' => $name, 'email' => $email]));
                 
                 // Validate captcha
                 if (!validateCaptcha($captcha, $_SESSION['captcha'] ?? '')) {
-                    logError("Contact captcha validation failed", ['provided' => $captcha, 'expected' => $_SESSION['captcha'] ?? '']);
+                    error_log("Contact captcha validation failed: " . json_encode(['provided' => $captcha, 'expected' => $_SESSION['captcha'] ?? '']));
                     jsonResponse(['success' => false, 'message' => 'Captcha noto\'g\'ri']);
                 }
                 
                 $stmt = $pdo->prepare("INSERT INTO contact_messages (name, email, message) VALUES (?, ?, ?)");
                 $stmt->execute([$name, $email, $message]);
                 
-                logSuccess("Contact message saved", ['name' => $name, 'email' => $email]);
+                error_log("Contact message saved: " . json_encode(['name' => $name, 'email' => $email]));
                 jsonResponse(['success' => true, 'message' => 'Sizning habaringiz yuborildi']);
             }
             break;
