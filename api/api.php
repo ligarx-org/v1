@@ -225,7 +225,7 @@ try {
         case 'post':
             if ($method === 'GET') {
                 $id = $_GET['id'] ?? 0;
-                logSuccess("Single post request", ['id' => $id]);
+                error_log("Single post request: " . $id);
                 
                 $stmt = $pdo->prepare("SELECT p.*, u.username, u.avatar,
                                              COALESCE((SELECT COUNT(*) FROM likes l WHERE l.post_id = p.id), 0) as like_count,
@@ -241,10 +241,10 @@ try {
                     $stmt = $pdo->prepare("UPDATE posts SET views = COALESCE(views, 0) + 1 WHERE id = ?");
                     $stmt->execute([$id]);
                     
-                    logSuccess("Post retrieved and view incremented", ['post_id' => $id, 'title' => $post['title']]);
+                    error_log("Post retrieved and view incremented: " . json_encode(['post_id' => $id, 'title' => $post['title']]));
                     jsonResponse(['success' => true, 'post' => $post]);
                 } else {
-                    logError("Post not found", ['id' => $id]);
+                    error_log("Post not found: " . $id);
                     jsonResponse(['success' => false, 'message' => 'Post topilmadi'], 404);
                 }
             }
