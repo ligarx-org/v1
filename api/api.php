@@ -439,12 +439,12 @@ try {
             
         case 'chat-messages':
             if ($method === 'GET') {
-                logSuccess("Chat messages request received");
+                error_log("Chat messages request received");
                 $token = $_GET['token'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? '';
                 $token = str_replace('Bearer ', '', $token);
                 $userId = $_GET['user_id'] ?? 0;
                 
-                logSuccess("Chat messages request data", ['user_id' => $userId]);
+                error_log("Chat messages request data: " . json_encode(['user_id' => $userId]));
                 
                 // Verify user session
                 $stmt = $pdo->prepare("SELECT user_id FROM user_sessions WHERE session_token = ? AND expires_at > NOW()");
@@ -452,7 +452,7 @@ try {
                 $session = $stmt->fetch();
                 
                 if (!$session) {
-                    logError("Invalid session for chat messages", ['token' => substr($token, 0, 10) . '...']);
+                    error_log("Invalid session for chat messages: " . substr($token, 0, 10) . '...');
                     jsonResponse(['success' => false, 'message' => 'Tizimga kiring'], 401);
                 }
                 
@@ -472,7 +472,7 @@ try {
                                       WHERE sender_id = ? AND receiver_id = ? AND is_read = 0");
                 $stmt->execute([$userId, $currentUserId]);
                 
-                logSuccess("Chat messages retrieved", ['count' => count($messages), 'between_users' => [$currentUserId, $userId]]);
+                error_log("Chat messages retrieved: " . json_encode(['count' => count($messages), 'between_users' => [$currentUserId, $userId]]));
                 jsonResponse(['success' => true, 'messages' => $messages]);
             }
             break;
