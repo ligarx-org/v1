@@ -93,11 +93,11 @@ try {
             
         case 'verify-email':
             if ($method === 'POST') {
-                logSuccess("Email verification request received");
+                error_log("Email verification request received");
                 $data = json_decode(file_get_contents('php://input'), true);
                 
                 if (!$data) {
-                    logError("Invalid JSON data for email verification");
+                    error_log("Invalid JSON data for email verification");
                     jsonResponse(['success' => false, 'message' => 'Noto\'g\'ri ma\'lumot formati']);
                 }
                 
@@ -105,7 +105,7 @@ try {
                 $email = $_SESSION['temp_user']['email'] ?? '';
                 
                 if (!$email) {
-                    logError("No temp user email found in session");
+                    error_log("No temp user email found in session");
                     jsonResponse(['success' => false, 'message' => 'Sessiya muddati tugagan']);
                 }
                 
@@ -117,10 +117,10 @@ try {
                     $stmt->execute([$tempUser['username'], $tempUser['email'], $tempUser['password']]);
                     
                     unset($_SESSION['temp_user']);
-                    logSuccess("User registration completed", ['email' => $email]);
+                    error_log("User registration completed: " . $email);
                     jsonResponse(['success' => true, 'message' => 'Ro\'yxatdan o\'tish muvaffaqiyatli yakunlandi!']);
                 } else {
-                    logError("Email verification failed", $result);
+                    error_log("Email verification failed: " . json_encode($result));
                     jsonResponse(['success' => false, 'message' => $result['message']]);
                 }
             }
