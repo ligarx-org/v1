@@ -128,11 +128,11 @@ try {
             
         case 'login':
             if ($method === 'POST') {
-                logSuccess("Login request received");
+                error_log("Login request received");
                 $data = json_decode(file_get_contents('php://input'), true);
                 
                 if (!$data) {
-                    logError("Invalid JSON data for login");
+                    error_log("Invalid JSON data for login");
                     jsonResponse(['success' => false, 'message' => 'Noto\'g\'ri ma\'lumot formati']);
                 }
                 
@@ -140,11 +140,11 @@ try {
                 $password = $data['password'];
                 $captcha = $data['captcha'];
                 
-                logSuccess("Login attempt", ['email' => $email]);
+                error_log("Login attempt: " . $email);
                 
                 // Validate captcha
                 if (!validateCaptcha($captcha, $_SESSION['captcha'] ?? '')) {
-                    logError("Login captcha validation failed", ['provided' => $captcha, 'expected' => $_SESSION['captcha'] ?? '']);
+                    error_log("Login captcha validation failed: " . json_encode(['provided' => $captcha, 'expected' => $_SESSION['captcha'] ?? '']));
                     jsonResponse(['success' => false, 'message' => 'Captcha noto\'g\'ri']);
                 }
                 
@@ -161,7 +161,7 @@ try {
                     $stmt->execute([$user['id'], $sessionToken, $expiresAt]);
                     
                     unset($user['password']);
-                    logSuccess("User logged in successfully", ['user_id' => $user['id'], 'email' => $email]);
+                    error_log("User logged in successfully: " . json_encode(['user_id' => $user['id'], 'email' => $email]));
                     jsonResponse([
                         'success' => true,
                         'message' => 'Muvaffaqiyatli tizimga kirdingiz!',
@@ -169,7 +169,7 @@ try {
                         'token' => $sessionToken
                     ]);
                 } else {
-                    logError("Login failed - invalid credentials", ['email' => $email]);
+                    error_log("Login failed - invalid credentials: " . $email);
                     jsonResponse(['success' => false, 'message' => 'Email yoki parol noto\'g\'ri']);
                 }
             }
