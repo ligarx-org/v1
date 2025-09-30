@@ -38,11 +38,11 @@ try {
     switch ($request) {
         case 'register':
             if ($method === 'POST') {
-                logSuccess("Register request received");
+                error_log("Register request received");
                 $data = json_decode(file_get_contents('php://input'), true);
                 
                 if (!$data) {
-                    logError("Invalid JSON data received for registration");
+                    error_log("Invalid JSON data received for registration");
                     jsonResponse(['success' => false, 'message' => 'Noto\'g\'ri ma\'lumot formati']);
                 }
                 
@@ -51,17 +51,17 @@ try {
                 $password = $data['password'];
                 $captcha = $data['captcha'];
                 
-                logSuccess("Registration data processed", ['username' => $username, 'email' => $email]);
+                error_log("Registration data processed: " . json_encode(['username' => $username, 'email' => $email]));
                 
                 // Validate captcha
                 if (!validateCaptcha($captcha, $_SESSION['captcha'] ?? '')) {
-                    logError("Captcha validation failed", ['provided' => $captcha, 'expected' => $_SESSION['captcha'] ?? '']);
+                    error_log("Captcha validation failed: " . json_encode(['provided' => $captcha, 'expected' => $_SESSION['captcha'] ?? '']));
                     jsonResponse(['success' => false, 'message' => 'Captcha noto\'g\'ri']);
                 }
                 
                 // Validate email
                 if (!validateEmail($email)) {
-                    logError("Email validation failed", ['email' => $email]);
+                    error_log("Email validation failed: " . $email);
                     jsonResponse(['success' => false, 'message' => 'Faqat @gmail.com manzillari qabul qilinadi']);
                 }
                 
@@ -69,7 +69,7 @@ try {
                 $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
                 $stmt->execute([$username, $email]);
                 if ($stmt->fetch()) {
-                    logError("User already exists", ['username' => $username, 'email' => $email]);
+                    error_log("User already exists: " . json_encode(['username' => $username, 'email' => $email]));
                     jsonResponse(['success' => false, 'message' => 'Foydalanuvchi yoki email allaqachon mavjud']);
                 }
                 
@@ -82,10 +82,10 @@ try {
                         'email' => $email,
                         'password' => password_hash($password, PASSWORD_DEFAULT)
                     ];
-                    logSuccess("Registration email sent", ['email' => $email]);
+                    error_log("Registration email sent: " . $email);
                     jsonResponse(['success' => true, 'message' => 'Tasdiqlash kodi emailingizga yuborildi']);
                 } else {
-                    logError("Email sending failed", $result);
+                    error_log("Email sending failed: " . json_encode($result));
                     jsonResponse(['success' => false, 'message' => $result['message']]);
                 }
             }
