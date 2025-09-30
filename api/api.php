@@ -10,17 +10,17 @@ header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    logSuccess("CORS preflight request handled");
+    error_log("CORS preflight request handled");
     exit(0);
 }
 
 try {
-    logSuccess("API request started", [
+    error_log("API request started: " . json_encode([
         'method' => $_SERVER['REQUEST_METHOD'],
         'action' => $_GET['action'] ?? 'none',
         'uri' => $_SERVER['REQUEST_URI'] ?? '',
         'timestamp' => date('Y-m-d H:i:s')
-    ]);
+    ]));
     
     session_start();
     require_once 'config.php';
@@ -33,7 +33,7 @@ try {
     $method = $_SERVER['REQUEST_METHOD'];
     $request = $_GET['action'] ?? '';
     
-    logSuccess("Processing request", ['action' => $request, 'method' => $method]);
+    error_log("Processing request: " . json_encode(['action' => $request, 'method' => $method]));
 
     switch ($request) {
         case 'register':
