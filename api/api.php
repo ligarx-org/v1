@@ -479,11 +479,11 @@ try {
             
         case 'send-message':
             if ($method === 'POST') {
-                logSuccess("Send message request received");
+                error_log("Send message request received");
                 $data = json_decode(file_get_contents('php://input'), true);
                 
                 if (!$data) {
-                    logError("Invalid JSON data for send message");
+                    error_log("Invalid JSON data for send message");
                     jsonResponse(['success' => false, 'message' => 'Noto\'g\'ri ma\'lumot formati']);
                 }
                 
@@ -492,7 +492,7 @@ try {
                 $receiverId = $data['receiver_id'];
                 $message = sanitizeInput($data['message']);
                 
-                logSuccess("Send message data", ['receiver_id' => $receiverId, 'message_length' => strlen($message)]);
+                error_log("Send message data: " . json_encode(['receiver_id' => $receiverId, 'message_length' => strlen($message)]));
                 
                 // Verify user session
                 $stmt = $pdo->prepare("SELECT user_id FROM user_sessions WHERE session_token = ? AND expires_at > NOW()");
@@ -500,14 +500,14 @@ try {
                 $session = $stmt->fetch();
                 
                 if (!$session) {
-                    logError("Invalid session for send message", ['token' => substr($token, 0, 10) . '...']);
+                    error_log("Invalid session for send message: " . substr($token, 0, 10) . '...');
                     jsonResponse(['success' => false, 'message' => 'Tizimga kiring'], 401);
                 }
                 
                 $stmt = $pdo->prepare("INSERT INTO chat_messages (sender_id, receiver_id, message) VALUES (?, ?, ?)");
                 $stmt->execute([$session['user_id'], $receiverId, $message]);
                 
-                logSuccess("Message sent", ['sender_id' => $session['user_id'], 'receiver_id' => $receiverId]);
+                error_log("Message sent: " . json_encode(['sender_id' => $session['user_id'], 'receiver_id' => $receiverId]));
                 jsonResponse(['success' => true, 'message' => 'Xabar yuborildi']);
             }
             break;
