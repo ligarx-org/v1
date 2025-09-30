@@ -307,7 +307,7 @@ try {
         case 'comments':
             if ($method === 'GET') {
                 $postId = $_GET['post_id'] ?? 0;
-                logSuccess("Comments request", ['post_id' => $postId]);
+                error_log("Comments request: " . $postId);
                 
                 $stmt = $pdo->prepare("SELECT c.*, u.username, u.avatar 
                                       FROM comments c 
@@ -317,14 +317,14 @@ try {
                 $stmt->execute([$postId]);
                 $comments = $stmt->fetchAll();
                 
-                logSuccess("Comments retrieved", ['post_id' => $postId, 'count' => count($comments)]);
+                error_log("Comments retrieved: " . json_encode(['post_id' => $postId, 'count' => count($comments)]));
                 jsonResponse(['success' => true, 'comments' => $comments]);
             } elseif ($method === 'POST') {
-                logSuccess("Add comment request received");
+                error_log("Add comment request received");
                 $data = json_decode(file_get_contents('php://input'), true);
                 
                 if (!$data) {
-                    logError("Invalid JSON data for comment");
+                    error_log("Invalid JSON data for comment");
                     jsonResponse(['success' => false, 'message' => 'Noto\'g\'ri ma\'lumot formati']);
                 }
                 
@@ -332,7 +332,7 @@ try {
                 $postId = $data['post_id'];
                 $content = sanitizeInput($data['content']);
                 
-                logSuccess("Comment data", ['post_id' => $postId, 'content_length' => strlen($content)]);
+                error_log("Comment data: " . json_encode(['post_id' => $postId, 'content_length' => strlen($content)]));
                 
                 // Verify user session
                 $stmt = $pdo->prepare("SELECT user_id FROM user_sessions WHERE session_token = ? AND expires_at > NOW()");
@@ -340,14 +340,14 @@ try {
                 $session = $stmt->fetch();
                 
                 if (!$session) {
-                    logError("Invalid session for comment", ['token' => substr($token, 0, 10) . '...']);
+                    error_log("Invalid session for comment: " . substr($token, 0, 10) . '...');
                     jsonResponse(['success' => false, 'message' => 'Tizimga kiring'], 401);
                 }
                 
                 $stmt = $pdo->prepare("INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)");
                 $stmt->execute([$postId, $session['user_id'], $content]);
                 
-                logSuccess("Comment added", ['post_id' => $postId, 'user_id' => $session['user_id']]);
+                error_log("Comment added: " . json_encode(['post_id' => $postId, 'user_id' => $session['user_id']]));
                 jsonResponse(['success' => true, 'message' => 'Izoh qo\'shildi']);
             }
             break;
