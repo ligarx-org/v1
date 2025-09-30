@@ -252,18 +252,18 @@ try {
             
         case 'like':
             if ($method === 'POST') {
-                logSuccess("Like request received");
+                error_log("Like request received");
                 $data = json_decode(file_get_contents('php://input'), true);
                 
                 if (!$data) {
-                    logError("Invalid JSON data for like");
+                    error_log("Invalid JSON data for like");
                     jsonResponse(['success' => false, 'message' => 'Noto\'g\'ri ma\'lumot formati']);
                 }
                 
                 $token = $data['token'];
                 $postId = $data['post_id'];
                 
-                logSuccess("Like request data", ['post_id' => $postId]);
+                error_log("Like request data: " . json_encode(['post_id' => $postId]));
                 
                 // Verify user session
                 $stmt = $pdo->prepare("SELECT user_id FROM user_sessions WHERE session_token = ? AND expires_at > NOW()");
@@ -271,7 +271,7 @@ try {
                 $session = $stmt->fetch();
                 
                 if (!$session) {
-                    logError("Invalid session for like", ['token' => substr($token, 0, 10) . '...']);
+                    error_log("Invalid session for like: " . substr($token, 0, 10) . '...');
                     jsonResponse(['success' => false, 'message' => 'Tizimga kiring'], 401);
                 }
                 
@@ -299,7 +299,7 @@ try {
                 $stmt->execute([$postId]);
                 $likeCount = $stmt->fetch()['count'];
                 
-                logSuccess("Like action completed", ['action' => $action, 'post_id' => $postId, 'user_id' => $userId, 'like_count' => $likeCount]);
+                error_log("Like action completed: " . json_encode(['action' => $action, 'post_id' => $postId, 'user_id' => $userId, 'like_count' => $likeCount]));
                 jsonResponse(['success' => true, 'action' => $action, 'like_count' => $likeCount]);
             }
             break;
