@@ -177,14 +177,14 @@ try {
             
         case 'posts':
             if ($method === 'GET') {
-                logSuccess("Posts request received");
+                error_log("Posts request received");
                 $page = (int)($_GET['page'] ?? 1);
                 $limit = (int)($_GET['limit'] ?? 10);
                 $search = $_GET['search'] ?? '';
                 $category = $_GET['category'] ?? '';
                 $offset = ($page - 1) * $limit;
                 
-                logSuccess("Posts query parameters", ['page' => $page, 'limit' => $limit, 'search' => $search, 'category' => $category]);
+                error_log("Posts query parameters: " . json_encode(['page' => $page, 'limit' => $limit, 'search' => $search, 'category' => $category]));
                 
                 $whereClause = "WHERE 1=1";
                 $params = [];
@@ -211,13 +211,13 @@ try {
                         ORDER BY p.created_at DESC 
                         LIMIT $limit OFFSET $offset";
                 
-                logSuccess("Executing posts query", ['sql' => $sql, 'params' => $params]);
+                error_log("Executing posts query: " . json_encode(['sql' => $sql, 'params' => $params]));
                 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
                 $posts = $stmt->fetchAll();
                 
-                logSuccess("Posts retrieved successfully", ['count' => count($posts)]);
+                error_log("Posts retrieved successfully: " . count($posts));
                 jsonResponse(['success' => true, 'posts' => $posts]);
             }
             break;
