@@ -385,12 +385,12 @@ try {
 
         case 'chat-users':
             if ($method === 'GET') {
-                logSuccess("Chat users request received");
+                error_log("Chat users request received");
                 $token = $_GET['token'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? '';
                 $token = str_replace('Bearer ', '', $token);
                 $search = $_GET['search'] ?? '';
                 
-                logSuccess("Chat users request data", ['search' => $search]);
+                error_log("Chat users request data: " . json_encode(['search' => $search]));
                 
                 // Verify user session
                 $stmt = $pdo->prepare("SELECT user_id FROM user_sessions WHERE session_token = ? AND expires_at > NOW()");
@@ -398,7 +398,7 @@ try {
                 $session = $stmt->fetch();
                 
                 if (!$session) {
-                    logError("Invalid session for chat users", ['token' => substr($token, 0, 10) . '...']);
+                    error_log("Invalid session for chat users: " . substr($token, 0, 10) . '...');
                     jsonResponse(['success' => false, 'message' => 'Tizimga kiring'], 401);
                 }
                 
@@ -432,7 +432,7 @@ try {
                 $stmt->execute($params);
                 $users = $stmt->fetchAll();
                 
-                logSuccess("Chat users retrieved", ['count' => count($users), 'current_user_id' => $currentUserId]);
+                error_log("Chat users retrieved: " . json_encode(['count' => count($users), 'current_user_id' => $currentUserId]));
                 jsonResponse(['success' => true, 'users' => $users]);
             }
             break;
