@@ -197,9 +197,14 @@ if ($_POST['action'] ?? '' === 'admin_login') {
 // Handle post creation
 if ($_POST['action'] ?? '' === 'create_post' && $isAdmin) {
     logSuccess("Post creation attempt");
-    $title = sanitizeInput($_POST['title']);
-    $content = $_POST['content']; // HTML content
-    $hashtags = sanitizeInput($_POST['hashtags']);
+    $title = sanitizeInput($_POST['title'] ?? '');
+    $content = $_POST['content'] ?? ''; // HTML content
+    $hashtags = sanitizeInput($_POST['hashtags'] ?? '');
+    
+    // Validate required fields
+    if (empty($title) || empty($content)) {
+        $error = 'Post nomi va matni majburiy';
+    } else {
     $slug = createSlug($title);
     
     // Handle image upload
@@ -228,6 +233,7 @@ if ($_POST['action'] ?? '' === 'create_post' && $isAdmin) {
     
     logSuccess("Post created successfully", ['title' => $title, 'author_id' => $currentUser['id']]);
     $success = 'Post muvaffaqiyatli yaratildi';
+    }
 }
 
 // Handle post deletion
@@ -380,7 +386,7 @@ if ($isAdmin) {
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"><?= $t['captcha'] ?></label>
                     <div class="flex items-center space-x-3">
-                        <img src="/api/captcha.php?<?= time() ?>" alt="Captcha" class="border rounded-lg shadow-sm">
+                        <img src="./api/captcha.php?<?= time() ?>" alt="Captcha" class="border rounded-lg shadow-sm">
                         <input type="text" name="captcha" required 
                                class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-200">
                         <button type="button" onclick="refreshCaptcha()" 
@@ -408,7 +414,7 @@ if ($isAdmin) {
     
     <script>
         function refreshCaptcha() {
-            document.querySelector('img[alt="Captcha"]').src = '/api/captcha.php?' + Date.now();
+            document.querySelector('img[alt="Captcha"]').src = './api/captcha.php?' + Date.now();
         }
         
         function toggleTheme() {
